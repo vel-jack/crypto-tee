@@ -45,7 +45,11 @@ contract TeePurchase is TeeFactory {
         emit Transfered(msg.sender, to, _teeIndex);
     }
 
-    function getAllTransactions() public view returns (Transfers[] memory) {
+    function getAllTransfers() public view returns (Transfers[] memory) {
         return transfers;
+    }
+
+    function getTransferLength() public view returns (uint256) {
+        return transfers.length;
     }
 }
