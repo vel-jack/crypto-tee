@@ -25,10 +25,9 @@ contract TeeFactory {
 
     function _designTee(string memory _name, uint256 _design) private {
         uint256 index = totalTeeDesigned;
-        address buyer = msg.sender;
         tees[index] = Tee(_name, _design);
-        teeOwner[index] = buyer;
-        howManyOwns[buyer].add(1);
+        teeOwner[index] = msg.sender;
+        howManyOwns[msg.sender].add(1);
         totalTeeDesigned.add(1);
     }
 
