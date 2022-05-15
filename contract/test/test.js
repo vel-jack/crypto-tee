@@ -14,4 +14,11 @@ describe("TeePurchase.sol", () => {
     const totalTees = await contract.totalTeeDesigned();
     expect(totalTees).to.equal(0);
   });
+  it("should return 1 after purchase tee", async () => {
+    await contract.purchaseTee("Jack", {
+      value: ethers.utils.parseEther("0.0002"),
+    });
+    const totalTees = await contract.totalTeeDesigned();
+    expect(totalTees).to.equal(1);
+  });
 });
