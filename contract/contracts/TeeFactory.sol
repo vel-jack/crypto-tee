@@ -7,10 +7,11 @@ import "./utils/Ownable.sol";
 contract TeeFactory is Ownable {
     using SafeMath for uint256;
     uint256 designMod = 10**9;
-
+    uint256 public initialAmount = 0.0002 ether;
     struct Tee {
         string name;
         uint256 design;
+        uint256 amount;
     }
 
     uint256 public totalTeeDesigned;
@@ -27,7 +28,7 @@ contract TeeFactory is Ownable {
 
     function _designTee(string memory _name, uint256 _design) private {
         uint256 index = totalTeeDesigned;
-        tees[index] = Tee(_name, _design);
+        tees[index] = Tee(_name, _design, initialAmount);
         teeOwner[index] = msg.sender;
         howManyOwns[msg.sender] = howManyOwns[msg.sender].add(1);
         totalTeeDesigned = index.add(1);
