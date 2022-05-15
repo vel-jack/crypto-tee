@@ -27,7 +27,7 @@ contract TeePurchase is TeeFactory {
     modifier onlyOwnerOf(uint256 teeIndex) {
         require(
             teeOwner[teeIndex] == msg.sender,
-            "Only owner can transfer the item"
+            "Only owner of the item can make changes"
         );
         _;
     }
