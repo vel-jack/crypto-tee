@@ -1,7 +1,7 @@
-const hre = require("hardhat");
+const { ethers } = require("hardhat");
 
 const main = async () => {
-  const TeePurchase = await hre.ethers.getContractFactory("TeePurchase");
+  const TeePurchase = await ethers.getContractFactory("TeePurchase");
   const teePurchase = await TeePurchase.deploy();
   await teePurchase.deployed();
   console.log("Contract deployed address, ", teePurchase.address);

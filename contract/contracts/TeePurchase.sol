@@ -116,7 +116,7 @@ contract TeePurchase is TeeFactory {
         pendingApproval[teeIndex] = msg.sender;
     }
 
-    function changeApprovalToMe(uint256 teeIndex) external payable {
+    function changeApprovalRequestToMe(uint256 teeIndex) external payable {
         require(msg.value >= changeApprovalFee);
         require(
             pendingApproval[teeIndex] != msg.sender,
