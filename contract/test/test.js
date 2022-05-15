@@ -40,11 +40,16 @@ describe("TeePurchase.sol", () => {
     await contract.connect(andrew).purchaseTee("Ben", {
       value: ethers.utils.parseEther("0.0002"),
     });
-    expect(await contract.howManyOwns(tom.address)).to.equal(2);
+    expect(await contract.howManyOwns(andrew.address)).to.equal(2);
   });
-
   it("Should return 4 tees", async () => {
     const totalTees = await contract.totalTeeDesigned();
     expect(totalTees).to.equal(4);
+  });
+  it("Should return 2 tees of Andrew", async () => {
+    const tees = await contract.connect(andrew).getMyTees();
+    expect(tees.length).to.equal(2);
+    expect(tees[0].name).to.equal("Gwen");
+    expect(tees[1].name).to.equal("Ben");
   });
 });
