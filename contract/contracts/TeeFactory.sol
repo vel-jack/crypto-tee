@@ -12,6 +12,7 @@ contract TeeFactory is Ownable {
         string name;
         uint256 design;
         uint256 amount;
+        uint256 id;
     }
 
     uint256 public totalTeeDesigned;
@@ -28,7 +29,7 @@ contract TeeFactory is Ownable {
 
     function _designTee(string memory _name, uint256 _design) private {
         uint256 index = totalTeeDesigned;
-        tees[index] = Tee(_name, _design, initialAmount);
+        tees[index] = Tee(_name, _design, initialAmount, index);
         teeOwner[index] = msg.sender;
         howManyOwns[msg.sender] = howManyOwns[msg.sender].add(1);
         totalTeeDesigned = index.add(1);
