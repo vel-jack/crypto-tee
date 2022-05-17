@@ -1,6 +1,8 @@
 import MintTee from "./components/Mint";
 import Navbar from "./components/Navbar";
+import TransferList from "./components/TransferList";
 import OwnedCollection from "./components/OwnedCollection";
+import Footer from "./components/Footer";
 
 const App = () => {
   return (
@@ -8,6 +10,8 @@ const App = () => {
       <Navbar />
       <MintTee />
       <OwnedCollection />
+      <TransferList />
+      <Footer />
     </div>
   );
 };

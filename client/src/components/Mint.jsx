@@ -2,8 +2,8 @@ import React from "react";
 
 export default function MintTee() {
   return (
-    <div className="p-6 flex flex-col justify-center items-center gap-2">
-      <div className="">
+    <div className="p-6 flex flex-col justify-center items-center gap-2 lg:h-96">
+      <div>
         <div className="text-xl sm:text-2xl lg:text-3xl">
           Mint your unique T-Shirt and say
         </div>

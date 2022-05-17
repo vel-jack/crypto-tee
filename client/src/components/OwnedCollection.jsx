@@ -20,26 +20,53 @@ const OwnedCollection = () => {
         <div className="text-xl font-semibold sm:text-2xl">
           Your collections
         </div>
-        <div className="flex flex-wrap gap-x-1 gap-y-2">
-          {["Jack", "Tom", "Rose", "OK", "Sometimes", "yes"].map(
-            (item, index) => (
-              <TeeChip
-                name={item}
-                id={index}
-                isCurrent={index == 4 ? true : false}
-              />
-            )
-          )}
+        <div className="flex flex-wrap gap-x-1 gap-y-2 xl:w-[60%]">
+          {[
+            "Jack",
+            "Tom",
+            "Rose",
+            "OK",
+            "Sometimes",
+            "yes",
+            "Jack",
+            "Tom",
+            "Rose",
+            "OK",
+            "Sometimes",
+            "yes",
+            "Jack",
+            "Tom",
+            "Rose",
+            "OK",
+            "Sometimes",
+            "yes",
+            "Jack",
+            "Tom",
+            "Rose",
+            "OK",
+            "Sometimes",
+            "yes",
+          ].map((item, index) => (
+            <TeeChip
+              key={index}
+              name={item}
+              id={index}
+              isCurrent={index == 4 ? true : false}
+            />
+          ))}
         </div>
       </div>
       <div className="flex flex-col items-center sm:flex-row sm:justify-center py-5 flex-wrap sm:gap-10">
-        <div className="">
+        <div className="relative">
           <canvas
             name="myCanvas"
             height="400"
             width="400"
             className="bg-black"
           />
+          <div className="absolute bottom-1 left-2 text-white">
+            Owned by <span className="font-bold">You</span>
+          </div>
         </div>
         <div>
           <div className="flex flex-col gap-3 py-2 sm:w-96">

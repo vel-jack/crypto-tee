@@ -14,6 +14,7 @@ contract TeePurchase is TeeFactory {
         address to;
         uint256 teeIndex;
         uint256 amount;
+        uint256 time;
     }
     Transfers[] public transfers;
     mapping(uint256 => address) public approved;
@@ -42,7 +43,13 @@ contract TeePurchase is TeeFactory {
         require(msg.value >= amount, "Not enough ether to purchase");
         designTee(_name);
         transfers.push(
-            Transfers(address(this), msg.sender, totalTeeDesigned, amount)
+            Transfers(
+                address(this),
+                msg.sender,
+                totalTeeDesigned,
+                amount,
+                block.timestamp
+            )
         );
         emit Purchase("Purchased", totalTeeDesigned);
     }
@@ -56,7 +63,7 @@ contract TeePurchase is TeeFactory {
         howManyOwns[from] = howManyOwns[from].sub(1);
         teeOwner[teeIndex] = to;
         howManyOwns[to] = howManyOwns[to].add(1);
-        transfers.push(Transfers(from, to, teeIndex, amount));
+        transfers.push(Transfers(from, to, teeIndex, amount, block.timestamp));
         emit Transfer(from, to, teeIndex, amount);
     }
 
@@ -85,6 +92,20 @@ contract TeePurchase is TeeFactory {
 
     function getAllTransfers() public view returns (Transfers[] memory) {
         return transfers;
+    }
+
+    function getTransactions(uint256 from, uint256 to)
+        public
+        view
+        returns (Transfers[] memory)
+    {
+        Transfers[] memory transaction = new Transfers[](to - from);
+        uint256 x = 0;
+        for (uint256 i = from; i < to; i++) {
+            transaction[x] = transfers[i];
+            x++;
+        }
+        return transaction;
     }
 
     function getTransferLength() public view returns (uint256) {
