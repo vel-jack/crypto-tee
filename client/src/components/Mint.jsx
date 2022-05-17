@@ -20,11 +20,11 @@ export default function MintTee() {
           <input
             type="text"
             placeholder="Nickname"
-            className="p-1 border w-full sm:w-64 text-center"
+            className="p-1 border border-black rounded w-full sm:w-64 text-center"
           />
           <div className="flex gap-2 flex-col sm:flex-row">
             <div>
-              <button className="px-4 py-1 bg-black text-white rounded font-bold w-full">
+              <button className="px-4 py-2 bg-black text-white rounded font-bold w-full">
                 Mint Now
               </button>
             </div>
