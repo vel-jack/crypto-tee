@@ -25,7 +25,7 @@ describe("TeePurchase.sol", () => {
     const totalTees = await contract.totalTeeDesigned();
     const tee = await contract.tees(0);
     expect(tee.name).to.equal("Jack");
-    expect(tee.design.toString().length).to.equal(9);
+    expect(tee.design.toString().length).to.equal(10);
   });
 
   it("Should mint/purchase tee from tom account", async () => {
