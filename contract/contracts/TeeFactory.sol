@@ -6,7 +6,7 @@ import "./utils/Ownable.sol";
 
 contract TeeFactory is Ownable {
     using SafeMath for uint256;
-    uint256 designMod = 10**9;
+    uint256 designMod = 10**10;
     uint256 public initialAmount = 0.0002 ether;
     struct Tee {
         string name;

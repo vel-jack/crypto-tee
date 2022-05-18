@@ -1,3 +1,4 @@
+import React from "react";
 import MintTee from "./components/Mint";
 import Navbar from "./components/Navbar";
 import TransferList from "./components/TransferList";
