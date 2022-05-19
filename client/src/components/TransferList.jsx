@@ -1,4 +1,5 @@
 import React from "react";
+import { shortAddress } from "../utils";
 const TransferList = () => {
   let t = [
     {
@@ -47,14 +48,8 @@ const TransferList = () => {
   const TransferRow = ({ props }) => {
     return (
       <tr>
-        <td className="text-left px-6 py-1">
-          {props.from.substring(0, 6)}...
-          {props.from.substring(props.from.length - 4)}
-        </td>
-        <td className="text-left px-6 py-1">
-          {props.to.substring(0, 6)}...
-          {props.to.substring(props.to.length - 4)}
-        </td>
+        <td className="text-left px-6 py-1">{shortAddress(props.from)}</td>
+        <td className="text-left px-6 py-1">{shortAddress(props.to)}</td>
         <td className="text-left px-6 py-1 hidden sm:block">{props.time}</td>
         <td className="text-left px-6 py-1">#{props.id}</td>
         <td className="text-left px-6 py-1">{props.amount}</td>
