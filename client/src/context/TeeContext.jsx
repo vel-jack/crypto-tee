@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { contractAbi, contractAddress } from "./contract";
 import { ethers } from "ethers";
+import { addressZero } from "../utils";
 
 const { ethereum } = window;
 
@@ -9,22 +10,25 @@ export const TeeContext = React.createContext();
 export const TeeContextProvider = ({ children }) => {
   const [currentAccount, setCurrentAccount] = useState("");
   const [collection, setCollection] = useState([]);
+  const [totalTees, setTotalTees] = useState(0);
+  const [currentTee, setCurrentTee] = useState(null);
+  const [currentTeeOwner, setCurrentTeeOwner] = useState("");
+  const [pendingApproval, setPendingApproval] = useState("");
+  const [isTeeApproved, setIsTeeApproved] = useState(false);
+  const [transferList, setTransferList] = useState([]);
   const getContract = () => {
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, contractAbi, signer);
     return contract;
   };
-  const [totalTees, setTotalTees] = useState(0);
-  const [currentTee, setCurrentTee] = useState(null);
-  const [currentTeeOwner, setCurrentTeeOwner] = useState("");
+
   const checkIsWalletConnected = async () => {
     try {
       if (!ethereum) return alert("Please install Metamask");
       const accounts = await ethereum.request({ method: "eth_accounts" });
       if (accounts.length) {
         setCurrentAccount(accounts[0]);
-        console.log(accounts);
       } else {
         console.log("No accounts connected");
       }
@@ -47,6 +51,7 @@ export const TeeContextProvider = ({ children }) => {
   };
 
   const mintNewTee = async (teeName) => {
+    if (!currentAccount) return alert("Please connect wallet");
     if (!teeName || teeName.length > 6) return alert("Choose valid nickname");
 
     try {
@@ -66,7 +71,6 @@ export const TeeContextProvider = ({ children }) => {
   };
 
   const getTeeCollections = async () => {
-    console.log("getTeeCollection called");
     try {
       if (!ethereum) return alert("Please install Metamask");
       const contract = getContract();
@@ -91,8 +95,9 @@ export const TeeContextProvider = ({ children }) => {
   };
 
   const searchTee = async (searchId) => {
+    if (!currentAccount) return alert("Please connect wallet");
     const teeID = parseInt(searchId);
-    if (teeID == isNaN) return alert("Invalid id");
+    if (isNaN(teeID)) return alert("Invalid id");
     if (teeID < 0 || teeID >= totalTees) return alert("Invalid id");
     try {
       if (!ethereum) return alert("Please install Metamask");
@@ -114,6 +119,7 @@ export const TeeContextProvider = ({ children }) => {
   };
 
   const updateNewPrice = async (id, newPrice) => {
+    if (!currentAccount) return alert("Please connect wallet");
     if (currentTee.id != id) return;
     try {
       if (!ethereum) return alert("Please install Metamask");
@@ -131,14 +137,182 @@ export const TeeContextProvider = ({ children }) => {
     }
   };
 
+  const transferTee = async (to, id) => {
+    if (!currentAccount) return alert("Please connect wallet");
+    if (
+      currentAccount.toLocaleLowerCase() != currentTeeOwner.toLocaleLowerCase()
+    )
+      return;
+
+    try {
+      if (!ethereum) return alert("Please install Metamask");
+      const contract = getContract();
+      const txn = await contract.transferTo(to, id);
+      console.log("Trying to transfer");
+      await txn.wait();
+      console.log("Transfered", txn.hash);
+      await getTeeCollections();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const requestApproval = async () => {
+    if (!currentAccount) return alert("Please connect wallet");
+    if (
+      currentAccount.toLocaleLowerCase() == currentTeeOwner.toLocaleLowerCase()
+    )
+      return;
+    try {
+      if (!ethereum) return alert("Please install Metamask");
+      const contract = getContract();
+      const txn = await contract.askForApproval(currentTee.id);
+      console.log("Trying to ask..");
+      await txn.wait();
+      console.log("Successfully asked", txn.hash);
+      await checkPendingApproval();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const changeApproval = async () => {
+    if (!currentAccount) return alert("Please connect wallet");
+    if (
+      currentAccount.toLocaleLowerCase() == currentTeeOwner.toLocaleLowerCase()
+    )
+      return;
+    try {
+      if (!ethereum) return alert("Please install Metamask");
+      const contract = getContract();
+      const txn = await contract.changeApprovalRequestToMe(currentTee.id, {
+        value: ethers.utils.parseEther("0.0001"),
+      });
+      console.log("Trying to change approval request..");
+      await txn.wait();
+      console.log("Successfully changed", txn.hash);
+      await checkPendingApproval();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const checkPendingApproval = async () => {
+    if (!currentAccount || !currentTee) return alert("Please connect wallet");
+    try {
+      if (!ethereum) return alert("Please install Metamask");
+      const contract = getContract();
+      const pendingAddress = await contract.pendingApproval(currentTee.id);
+      if (pendingAddress != addressZero) {
+        setPendingApproval(pendingAddress);
+        if (
+          pendingAddress.toLocaleLowerCase() ==
+          currentAccount.toLocaleLowerCase()
+        ) {
+          checkApproved();
+        }
+      } else {
+        setPendingApproval("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const approveToAddress = async (to, id) => {
+    if (!currentAccount) return alert("Please connect wallet");
+    if (
+      currentAccount.toLocaleLowerCase() != currentTeeOwner.toLocaleLowerCase()
+    )
+      return alert("You are not the owner");
+    if (!ethers.utils.isAddress(to))
+      return alert("Please provide valid address");
+    try {
+      if (!ethereum) return alert("Please install Metamask");
+      const contract = getContract();
+      const txn = await contract.approveTo(to, parseInt(id));
+      console.log("Trying to approve..");
+      await txn.wait();
+      console.log("Successfully approved", txn.hash);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const checkApproved = async () => {
+    if (!currentAccount || !currentTee) return alert("Please connect wallet");
+    try {
+      if (!ethereum) return alert("Please install Metamask");
+      const contract = getContract();
+      const approvedAddress = await contract.approved(currentTee.id);
+      setIsTeeApproved(
+        currentAccount.toLowerCase() == approvedAddress.toLowerCase()
+          ? true
+          : false
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const buyFromOwner = async (teeOwner, id) => {
+    if (!currentAccount) return alert("Please connect wallet");
+    if (!currentTee || currentTee.id != id) return;
+    if (!ethers.utils.isAddress(teeOwner)) return;
+    try {
+      if (!ethereum) return alert("Please install Metamask");
+      const contract = getContract();
+      const txn = await contract.buyFromOwner(teeOwner, id, {
+        value: ethers.utils.parseEther(currentTee.amount),
+      });
+      console.log("Trying to buy..");
+      await txn.wait();
+      console.log("Transcation succes", txn.hash);
+      await getTeeCollections();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAllTransfers = async () => {
+    if (!currentAccount) return alert("Please connect wallet");
+    try {
+      if (!ethereum) return alert("Please install Metamask");
+      const contract = getContract();
+      const transfers = await contract.getAllTransfers();
+      let transferArray = transfers.map((item) => ({
+        from: item.from,
+        to: item.to,
+        time: parseInt(item.time),
+        id: parseInt(item.teeIndex),
+        amount: ethers.utils.formatEther(item.amount),
+      }));
+      transferArray.reverse();
+      setTransferList(transferArray);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     checkIsWalletConnected();
   }, []);
+
   useEffect(() => {
     if (currentAccount) {
       getTeeCollections();
+      if (!transferList.length) {
+        getAllTransfers();
+      }
     }
   }, [currentAccount]);
+
+  useEffect(() => {
+    if (currentAccount && currentTee) {
+      checkPendingApproval();
+    }
+  }, [currentTee]);
+
   return (
     <TeeContext.Provider
       value={{
@@ -153,6 +327,16 @@ export const TeeContextProvider = ({ children }) => {
         setCurrentTeeOwner,
         totalTees,
         updateNewPrice,
+        transferTee,
+        requestApproval,
+        pendingApproval,
+        setPendingApproval,
+        approveToAddress,
+        isTeeApproved,
+        setIsTeeApproved,
+        buyFromOwner,
+        changeApproval,
+        transferList,
       }}
     >
       {children}

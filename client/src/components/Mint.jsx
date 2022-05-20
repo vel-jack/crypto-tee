@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { TeeContext } from "../context/TeeContext";
 
 export default function MintTee() {
-  const { mintNewTee } = useContext(TeeContext);
+  const { mintNewTee, totalTees } = useContext(TeeContext);
   const [nickName, setNickName] = useState("");
   return (
     <div className="p-6 flex flex-col justify-center items-center gap-2 lg:h-96">
@@ -42,6 +42,11 @@ export default function MintTee() {
             </div>
           </div>
         </div>
+        {totalTees > 0 && (
+          <div className="font-bold text-xl md:py-10 md:text-2xl">
+            Totol T-Shirt minted {totalTees}
+          </div>
+        )}
       </div>
     </div>
   );

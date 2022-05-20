@@ -15,12 +15,23 @@ const OwnedCollection = () => {
     searchTee,
     totalTees,
     updateNewPrice,
+    transferTee,
+    requestApproval,
+    pendingApproval,
+    setPendingApproval,
+    approveToAddress,
+    isTeeApproved,
+    setIsTeeApproved,
+    buyFromOwner,
+    changeApproval,
   } = useContext(TeeContext);
 
   const canvasRef = useRef(null);
   const [searchId, setSearchId] = useState("");
   const [isTeeOwner, setIsTeeOwner] = useState(false);
   const [newPrice, setNewPrice] = useState("");
+  const [transferAddress, setTransferAddress] = useState("");
+  const [approveTo, setApproveTo] = useState("");
   let image1 = new Image();
   let image2 = new Image();
   image1.src = teeStyle;
@@ -116,6 +127,9 @@ const OwnedCollection = () => {
     if (currentTee) {
       makeTee(currentTee.design, currentTee.nickname);
     }
+    setApproveTo("");
+    setPendingApproval("");
+    setIsTeeApproved(false);
   }, [currentTee]);
 
   return (
@@ -208,10 +222,18 @@ const OwnedCollection = () => {
                 <div className="flex justify-between sm:flex-col gap-2">
                   <input
                     type="text"
+                    value={transferAddress}
+                    onChange={(e) => setTransferAddress(e.target.value)}
                     placeholder="Wallet address"
                     className="py-1 px-2 sm:w-full sm:text-center rounded border border-black w-72"
                   />
-                  <button className="bg-black text-white font-bold py-2 w-[100px] rounded sm:w-full ">
+                  <button
+                    onClick={(e) => {
+                      transferTee(transferAddress, currentTee.id);
+                      setTransferAddress("");
+                    }}
+                    className="bg-black text-white font-bold py-2 w-[100px] rounded sm:w-full "
+                  >
                     Transfer
                   </button>
                 </div>
@@ -220,25 +242,78 @@ const OwnedCollection = () => {
                   <input
                     type="text"
                     placeholder="Wallet address"
+                    value={approveTo}
+                    onChange={(e) => {
+                      setApproveTo(e.target.value);
+                    }}
                     className="py-1 px-2 sm:w-full sm:text-center rounded border border-black w-72"
                   />
-                  <button className="bg-black text-white font-bold py-2 w-[100px] rounded sm:w-full ">
+                  <button
+                    onClick={(e) => {
+                      approveToAddress(approveTo, currentTee.id);
+                    }}
+                    className="bg-black text-white font-bold py-2 w-[100px] rounded sm:w-full "
+                  >
                     Approve
                   </button>
                 </div>
+                {pendingApproval && (
+                  <div>
+                    {"Pending Approval : "}
+                    <button
+                      className="font-bold"
+                      onClick={(e) => setApproveTo(pendingApproval)}
+                    >
+                      {shortAddress(pendingApproval).toUpperCase()}
+                    </button>
+                  </div>
+                )}
               </>
             )}
             {!isTeeOwner && (
               <>
-                <button className="bg-black text-white font-bold py-2 rounded w-full ">
-                  Request for approval
-                </button>
-                <button className="bg-black text-white font-bold py-2 rounded w-full ">
-                  Approve me (0.0001 ETH)
-                </button>
-                <button className="bg-black text-white font-bold py-2 rounded w-full ">
-                  Buy from Owner
-                </button>
+                {pendingApproval ? (
+                  <button className="bg-black text-white font-bold py-2 rounded w-full cursor-text">
+                    {pendingApproval.toLowerCase() ==
+                    currentAccount.toLowerCase()
+                      ? "Already you asked 👍"
+                      : `Asked by ${shortAddress(pendingApproval)}`}
+                  </button>
+                ) : (
+                  <button
+                    className="bg-black text-white font-bold py-2 rounded w-full"
+                    onClick={(e) => requestApproval()}
+                  >
+                    Request for approval
+                  </button>
+                )}
+                {pendingApproval &&
+                  pendingApproval.toLowerCase() !=
+                    currentAccount.toLowerCase() && (
+                    <button
+                      onClick={(e) => changeApproval()}
+                      className="bg-black text-white font-bold py-2 rounded w-full "
+                    >
+                      Approve me (0.0001 ETH) 💸
+                    </button>
+                  )}
+                {isTeeApproved ? (
+                  <button
+                    onClick={(e) => {
+                      buyFromOwner(currentTeeOwner, currentTee.id);
+                    }}
+                    className="bg-black text-white font-bold py-2 rounded w-full"
+                  >
+                    Buy from Owner 💸
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => alert("You are not approved by tee owner")}
+                    className="bg-black hover:cursor-not-allowed text-white font-bold py-2 rounded w-full line-through"
+                  >
+                    Buy from Owner
+                  </button>
+                )}
               </>
             )}
           </div>
