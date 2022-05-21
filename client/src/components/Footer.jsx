@@ -6,7 +6,9 @@ const Footer = () => {
       <div className="flex gap-2 sm:items-end sm:flex-row flex-col">
         <div className="font-bold text-lg ">Crypto-T</div>
         <div className="italic">
-          <a href="https://github.com/vel-jack/crypto-tee">GitHub</a>
+          <a href="https://github.com/vel-jack/crypto-tee" target="_blank">
+            GitHub
+          </a>
         </div>
       </div>
       <div className="flex gap-2 sm:flex-row flex-col">
