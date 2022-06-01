@@ -313,6 +313,15 @@ export const TeeContextProvider = ({ children }) => {
     }
   }, [currentTee]);
 
+  useEffect(() => {
+    window.ethereum.on('chainChanged',(chainId)=>{
+      console.log(chainId);
+    });
+    return ()=>{
+      window.ethereum.remomveAllListeners();
+    }
+  }, [])
+  
   return (
     <TeeContext.Provider
       value={{
