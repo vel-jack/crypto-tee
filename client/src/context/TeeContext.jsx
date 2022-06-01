@@ -16,7 +16,10 @@ export const TeeContextProvider = ({ children }) => {
   const [pendingApproval, setPendingApproval] = useState("");
   const [isTeeApproved, setIsTeeApproved] = useState(false);
   const [transferList, setTransferList] = useState([]);
+  const [isRinkeby, setIsRinkeby] = useState(true);
+  const [loading, setLoading] = useState(false);
   const getContract = () => {
+
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, contractAbi, signer);
@@ -51,19 +54,21 @@ export const TeeContextProvider = ({ children }) => {
   };
 
   const mintNewTee = async (teeName) => {
+    if(!isRinkeby) return;
     if (!currentAccount) return alert("Please connect wallet");
     if (!teeName || teeName.length > 6) return alert("Choose valid nickname");
 
     try {
       if (!ethereum) return alert("Please install Metamask");
-
       const contract = getContract();
       const txn = await contract.purchaseTee(teeName, {
         value: ethers.utils.parseEther("0.0002"),
       });
       console.log("Trying to mint...");
+      setLoading(true)
       await txn.wait();
       console.log("Done ", txn.hash);
+      setLoading(false)
       await getTeeCollections();
     } catch (error) {
       console.log(error);
@@ -95,6 +100,7 @@ export const TeeContextProvider = ({ children }) => {
   };
 
   const searchTee = async (searchId) => {
+    if(!isRinkeby) return;
     if (!currentAccount) return alert("Please connect wallet");
     const teeID = parseInt(searchId);
     if (isNaN(teeID)) return alert("Invalid id");
@@ -102,6 +108,7 @@ export const TeeContextProvider = ({ children }) => {
     try {
       if (!ethereum) return alert("Please install Metamask");
       const contract = getContract();
+      setLoading(true)
       const item = await contract.tees(teeID);
       const teeOwner = await contract.teeOwner(teeID);
       const tee = {
@@ -110,6 +117,7 @@ export const TeeContextProvider = ({ children }) => {
         design: item.design.toString(),
         amount: ethers.utils.formatEther(item.amount),
       };
+      setLoading(false);
       if (parseInt(item.design) == 0) return;
       setCurrentTee(tee);
       setCurrentTeeOwner(teeOwner);
@@ -119,6 +127,7 @@ export const TeeContextProvider = ({ children }) => {
   };
 
   const updateNewPrice = async (id, newPrice) => {
+    if(!isRinkeby) return;
     if (!currentAccount) return alert("Please connect wallet");
     if (currentTee.id != id) return;
     try {
@@ -129,8 +138,10 @@ export const TeeContextProvider = ({ children }) => {
         ethers.utils.parseEther(newPrice)
       );
       console.log("Trying to change");
+      setLoading(true)
       await txn.wait();
       console.log("Price changed ", txn.hash);
+      setLoading(false);
       await searchTee(id);
     } catch (error) {
       console.log(error);
@@ -149,15 +160,18 @@ export const TeeContextProvider = ({ children }) => {
       const contract = getContract();
       const txn = await contract.transferTo(to, id);
       console.log("Trying to transfer");
+      setLoading(true)
       await txn.wait();
       console.log("Transfered", txn.hash);
       await getTeeCollections();
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
   };
 
   const requestApproval = async () => {
+    if(!isRinkeby) return;
     if (!currentAccount) return alert("Please connect wallet");
     if (
       currentAccount.toLocaleLowerCase() == currentTeeOwner.toLocaleLowerCase()
@@ -168,8 +182,10 @@ export const TeeContextProvider = ({ children }) => {
       const contract = getContract();
       const txn = await contract.askForApproval(currentTee.id);
       console.log("Trying to ask..");
+      setLoading(true)
       await txn.wait();
       console.log("Successfully asked", txn.hash);
+      setLoading(false);
       await checkPendingApproval();
     } catch (error) {
       console.log(error);
@@ -232,8 +248,10 @@ export const TeeContextProvider = ({ children }) => {
       const contract = getContract();
       const txn = await contract.approveTo(to, parseInt(id));
       console.log("Trying to approve..");
+      setLoading(true)
       await txn.wait();
       console.log("Successfully approved", txn.hash);
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -266,9 +284,11 @@ export const TeeContextProvider = ({ children }) => {
         value: ethers.utils.parseEther(currentTee.amount),
       });
       console.log("Trying to buy..");
+      setLoading(true)
       await txn.wait();
       console.log("Transcation succes", txn.hash);
       await getTeeCollections();
+      setLoading(false)
     } catch (error) {
       console.log(error);
     }
@@ -314,8 +334,12 @@ export const TeeContextProvider = ({ children }) => {
   }, [currentTee]);
 
   useEffect(() => {
+    if(window.ethereum.chainId != '0x4'){
+      setIsRinkeby(false);
+    }
     window.ethereum.on('chainChanged',(chainId)=>{
       console.log(chainId);
+      window.location.reload();
     });
     return ()=>{
       window.ethereum.remomveAllListeners();
@@ -346,6 +370,8 @@ export const TeeContextProvider = ({ children }) => {
         buyFromOwner,
         changeApproval,
         transferList,
+        isRinkeby,
+        loading
       }}
     >
       {children}
