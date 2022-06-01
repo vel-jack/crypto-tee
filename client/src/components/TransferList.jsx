@@ -4,7 +4,7 @@ import { TeeContext } from "../context/TeeContext";
 import { date, date2, shortAddress } from "../utils";
 
 const TransferList = () => {
-  const { transferList, currentAccount } = useContext(TeeContext);
+  const { transferList, currentAccount,searchTee } = useContext(TeeContext);
   const [currentList, setCurrentList] = useState([]);
   const [currentCursor, setCurrentCursor] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -27,18 +27,22 @@ const TransferList = () => {
     return (
       <tr>
         <td className="text-left px-6 py-1">
+        <a href={`https://rinkeby.etherscan.io/address/${props.from}`} target="_blank" className="hover:underline">
           {currentAccount &&
           currentAccount.toLowerCase() == props.from.toLowerCase()
             ? "You"
             : contractAddress.toLowerCase() == props.from.toLowerCase()
             ? "Crypto-T "
             : shortAddress(props.from)}
+            </a>
         </td>
         <td className="text-left px-6 py-1">
+        <a href={`https://rinkeby.etherscan.io/address/${props.to}`} target="_blank" className="hover:underline">
           {currentAccount &&
           currentAccount.toLowerCase() == props.to.toLowerCase()
             ? "You"
             : shortAddress(props.to)}
+            </a>
         </td>
         {/* <td className="text-left px-6 py-1 hidden sm:block">{props.time}</td> */}
         <td className="text-left px-6 py-1 hidden lg:block">
@@ -47,7 +51,7 @@ const TransferList = () => {
         <td className="text-left px-6 py-1 hidden lg:hidden md:block ">
           {date2(props.time)}
         </td>
-        <td className="text-left px-6 py-1">#{props.id}</td>
+        <td className="text-left px-6 py-1"><button className="hover:font-bold" onClick={(e)=>searchTee(props.id-1)}>#{props.id-1}</button> </td>
         <td className="text-left px-6 py-1">{props.amount}</td>
       </tr>
     );
