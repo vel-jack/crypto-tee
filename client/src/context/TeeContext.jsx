@@ -334,13 +334,15 @@ export const TeeContextProvider = ({ children }) => {
   }, [currentTee]);
 
   useEffect(() => {
-    if(window.ethereum.chainId != '0x4'){
-      setIsRinkeby(false);
+    if(window.ethereum){
+      if(window.ethereum.chainId != '0x4'){
+        setIsRinkeby(false);
+      }
+      window.ethereum.on('chainChanged',(chainId)=>{
+        console.log(chainId);
+        window.location.reload();
+      });
     }
-    window.ethereum.on('chainChanged',(chainId)=>{
-      console.log(chainId);
-      window.location.reload();
-    });
     return ()=>{
       window.ethereum.remomveAllListeners();
     }

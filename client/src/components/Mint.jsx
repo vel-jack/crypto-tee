@@ -2,10 +2,10 @@ import React, { useContext, useState } from "react";
 import { TeeContext } from "../context/TeeContext";
 
 export default function MintTee() {
-  const { mintNewTee, totalTees,isRinkeby } = useContext(TeeContext);
+  const { mintNewTee, totalTees,isRinkeby,connectWallet,currentAccount } = useContext(TeeContext);
   const [nickName, setNickName] = useState("");
   return (
-    <div className="p-6 flex flex-col justify-center items-center gap-2 lg:h-96">
+    <div className={`p-6 flex flex-col justify-center items-center gap-2 ${currentAccount?'lg:h-96':'lg:h-52'} `}>
       <div>
         <div className="text-xl sm:text-2xl lg:text-3xl">
           Mint your unique T-Shirt and say
@@ -13,11 +13,11 @@ export default function MintTee() {
         <div className="font-bold italic text-2xl sm:text-3xl md:text-4xl">
           "I own unique tee(s) in this crypto world"
         </div>
-        {!isRinkeby&& <div className="text-red-500 text-center font-bold animate-bounce pt-5">
+        {!isRinkeby&&currentAccount&& <div className="text-red-500 text-center font-bold animate-bounce pt-5">
         ⚽ Please switch to the Rinkeby Network
         </div>}
       </div>
-      <div className=" w-full flex flex-col justify-center sm:items-center gap-2 py-3 sm:p-6">
+      {currentAccount&& <div className=" w-full flex flex-col justify-center sm:items-center gap-2 py-3 sm:p-6">
         <div className="text-sm text-gray-500 italic sm:text-lg">
           Choose your perfect nickname
         </div>
@@ -50,7 +50,19 @@ export default function MintTee() {
             Totol T-Shirt minted {totalTees}
           </div>
         )}
+      </div>}
+      {
+        !currentAccount&& <div className="md:py-4">
+        <button
+          className={`text-xl font-bold bg-black text-white px-3 py-2 rounded ${
+            currentAccount && "hidden"
+          }`}
+          onClick={connectWallet}
+        >
+          Connect wallet
+        </button>
       </div>
+      }
     </div>
   );
 }
